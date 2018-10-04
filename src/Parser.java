@@ -3,41 +3,40 @@ import java.util.*;
 
 public class Parser {
 
-    ArrayList fileList = new ArrayList();
+    private ArrayList fileList = new ArrayList();
 
     //CLASS HANDLER
-    public void addClass(ArrayList list){
+    private void addClass(){
 
         //Add class to Tree
-        String[] classParts = list.get(0).toString().split(" ");
+        String[] classParts = fileList.get(0).toString().split(" ");
         Tree<String> newClass = new Tree<>(classParts[1]);
-	//NEED TO FIX TREE CLASS, MODEL CANNOT BE RESOLVED
         newClass.setParent(model);
         fileList.remove(0);
 
         //Parses the block until the next semicolon
-        String firstLine = list.get(0).toString();
+        String firstLine = fileList.get(0).toString();
         while(!(firstLine.startsWith(";"))){
 
             //ATTRIBUTES
-            if(list.get(0).toString().startsWith("ATTRIBUTES")){
+            if(fileList.get(0).toString().startsWith("ATTRIBUTES")){
                 fileList.remove(0);
 
                 ArrayList attributes = new ArrayList();
                 while(!(fileList.get(0).toString().startsWith("OPERATIONS"))){
-                    attributes.add(convertAttributes(fileList));
+                    attributes.add(convertAttributes());
                     fileList.remove(0);
                 }
                 newClass.addChildren(attributes);
             }
 
             //OPERATIONS
-            if(list.get(0).toString().startsWith("OPERATIONS")){
+            if(fileList.get(0).toString().startsWith("OPERATIONS")){
                 fileList.remove(0);
 
                 ArrayList operations = new ArrayList();
                 while(!(fileList.get(0).toString().startsWith(";"))){
-                    operations.add(convertOperations(fileList));
+                    operations.add(convertOperations());
                     fileList.remove(0);
                 }
                 newClass.addChildren(operations);
@@ -45,13 +44,13 @@ public class Parser {
         }
     }
 
-    public String convertAttributes(ArrayList file){
-        String[] attrParts = file.get(0).toString().split(" : ");
+    private String convertAttributes(){
+        String[] attrParts = fileList.get(0).toString().split(" : ");
         return (attrParts[0]+" "+ attrParts[1]);
     }
 
-    public String convertOperations(ArrayList file){
-        String[] opParts = file.get(0).toString().split(" : ");
+    private String convertOperations(){
+        String[] opParts = fileList.get(0).toString().split(" : ");
         if (opParts[1].endsWith(",")){
             opParts[1].substring(0,(opParts[1].length()-1));
         }
@@ -60,18 +59,21 @@ public class Parser {
 
 
     //GENERALIZATION HANDLER
-    public void addGeneralization(ArrayList file) {
+    private void addGeneralization() {
         ArrayList generalization = new ArrayList();
+        String generalizationParts[] = fileList.get(0).toString().split(" ");
+        fileList.remove(0);
+        String subclasses[] = fileList.get(0).toString().split(" ");
 
     }
 
     //RELATION HANDLER
-    public void addRelation(ArrayList file) {
+    private void addRelation() {
 
     }
 
     //AGGREGATION
-    public void addAggregation(ArrayList file) {
+    private void addAggregation() {
 
     }
 
@@ -102,22 +104,27 @@ public class Parser {
 
             //if next block is CLASS
             if(fileList.get(0).toString().startsWith("CLASS")){
-                addClass(fileList);
+                addClass();
             }
 
             //if next block is GENERALIZATION
             if(fileList.get(0).toString().startsWith("GENERALIZATION")){
-                addGeneralization(fileList);
+                addGeneralization();
             }
-            
+
             //if next block is RELATION
             if(fileList.get(0).toString().startsWith("RELATION")){
-                addRelation(fileList);
+                addRelation();
             }
 
             //if next block is AGGREGATION
             if(fileList.get(0).toString().startsWith("AGGREGATION")){
-                addAggregation(fileList);
+                addAggregation();
+            }
+
+            //if next block is semi colon
+            if(fileList.get(0).toString().startsWith(";")){
+                fileList.remove(0);
             }
         }
 
