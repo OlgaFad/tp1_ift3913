@@ -36,10 +36,15 @@ public class GUI {
 
 	private JFrame frame;
 	private JTextField textField;
+	private String selectedElement;
 	private JTextArea output;
+	private JList attributs;
 	String newline = "\n";
-	private JTree tree;
-	
+	int numberClasses = 0;
+	DefaultListModel attributsModel = new DefaultListModel();
+	MyTree tree;
+	DefaultMutableTreeNode root;
+	DefaultMutableTreeNode[] dmtnRootChildren;
 	
 	/**
 	 * Launch the application.
@@ -116,42 +121,55 @@ public class GUI {
 		
 		
 		//Essai
+		tree = new MyTree("Ligue");
+		root = tree.getDMTNRoot();
 		
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Ligue");
+		String[] classes =  {"Participants", "Equipes", "Entraineurs"};
 		
-		//Creation de mes "classes"
-		for(int i=0; i<5; i++){
-			createNode(root, "lol");
-		}
+		String[] attributsP = {"String nom", "Strin age"};
+		String[] attributsEq = {"String nom_equipe"};
+		String[] attributsEn = {"Integer degre"};
 		
-		tree = new JTree(root);
+		String[][] attribut = {attributsP, attributsEq, attributsEn};
 		
-		
+		tree.createNodeChildren(root, classes);
+
+		//Creation des DefaultListModel pour chaque noeud
+		DefaultListModel classesModel = tree.createDefaultListModel(root);
 		
 		//Création  des frames gui qui affichent les composantes uml
 		
-		int nbreDeClasses = 5;
-		
-		DefaultListModel classesModel = new DefaultListModel();
-		//Creer defaultListModel
-		for(int i=0; i<nbreDeClasses; i++){
-			classesModel.add(i, root.getChildAt(i));
-		}
 		JList classesL = new JList(classesModel);
 		classesL.setBounds(17, 59, 117, 224);
 		frame.getContentPane().add(classesL);
 		
-		//Creer list selection listener
-//		classesL.addListSelectionListener(listener);
-		ListSelectionModel listSelectionModel = classesL.getSelectionModel();
-		listSelectionModel.addListSelectionListener(new SharedListSelectionHandler());
+		dmtnRootChildren = tree.getChildrenTreeNodes(root);
+		numberClasses = dmtnRootChildren.length;
 		
-		DefaultListModel attributsModel = new DefaultListModel();
-		//Remplir la case des attributs
+		//Rempli les enfants de chaque classe
+		for(int i = 0; i <numberClasses; i++){
+			
+			tree.createNodeChildren(dmtnRootChildren[i], attribut[i]);
+//			attributsModel = tree.createDefaultListModel(dmtnRootChildren[i]);
+		}
 		
-		JList attributs = new JList(attributsModel);
+
+		attributs = new JList();
+		attributs.setModel(attributsModel);
 		attributs.setBounds(149, 59, 132, 65);
 		frame.getContentPane().add(attributs);
+		System.out.println(attributs.getModel());
+		
+		ListSelectionModel classesLSelectionModel;
+		classesLSelectionModel = classesL.getSelectionModel();
+		classesLSelectionModel.addListSelectionListener( new ClassListSelectionHandler());
+		
+//		listEventListener();
+
+//		output = new JTextArea();
+//		output.setBounds(146, 202, 97, 16);
+//		frame.getContentPane().add(output);
+		
 		
 		DefaultListModel methodesModel = new DefaultListModel();
 		JList méthodes = new JList();
@@ -197,83 +215,34 @@ public class GUI {
 		lblDtails.setBounds(146, 202, 97, 16);
 		frame.getContentPane().add(lblDtails);
 		
-		output = new JTextArea();
-		output.setBounds(146, 218, 70, 56);
-		frame.getContentPane().add(output);
-        output.setEditable(false);
 	}
 	
 	
 	
-	//Essai
-	private void createNode(DefaultMutableTreeNode root, String children) {
+	private void classListValueChanged(javax.swing.event.ListSelectionListener evt, JList list){
+		String selected = list.getSelectedValue().toString();
+		selectedElement = selected;
 		
-        DefaultMutableTreeNode child;
-        child = new DefaultMutableTreeNode(children);
-        root.add(child);
-    }
+	}
 	
-	//Fin Essai
-	
-	class SharedListSelectionHandler implements ListSelectionListener {
+	class ClassListSelectionHandler implements ListSelectionListener {
 	    public void valueChanged(ListSelectionEvent e) {
 	        ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-
-	        int firstIndex = e.getFirstIndex();
-	        int lastIndex = e.getLastIndex();
-	        boolean isAdjusting = e.getValueIsAdjusting();
-	        output.append("Event for indexes "
-	                      + firstIndex + " - " + lastIndex
-	                      + "; isAdjusting is " + isAdjusting
-	                      + "; selected indexes:");
-
-	        if (lsm.isSelectionEmpty()) {
-	            output.append(" <none>");
-	        } else {
-	            // Find out which indexes are selected.
-	            int minIndex = lsm.getMinSelectionIndex();
-	            int maxIndex = lsm.getMaxSelectionIndex();
-	            for (int i = minIndex; i <= maxIndex; i++) {
-	                if (lsm.isSelectedIndex(i)) {
-	                    output.append(" " + i);
-	                }
-	            }
+	        
+	        for(int i=0; i<attributsModel.size(); i++){
+	        	attributsModel.remove(i);
 	        }
-	        output.append(newline);
+	        
+	        for(int i = 0; i< numberClasses; i++){
+	        	if (lsm.isSelectedIndex(i)){
+	        		attributsModel = tree.createDefaultListModel(dmtnRootChildren[i]);
+	        	}
+	        }
+	        
+	        attributs.setModel(attributsModel);
+	        System.out.println(attributs.getModel());
+			frame.getContentPane().add(attributs);
+	        
 	    }
 	}
-	
-	
-	
-//	public String[][] retrieveNodesChildren(TreeNode treeNode, DefaultListModel mod){
-//		
-//		String[][] treeNodes;
-//		
-//		((JTree) treeNode).getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-//	    ((JTree) treeNode).addTreeSelectionListener(new TreeSelectionListener() {
-//	        public void valueChanged(TreeSelectionEvent e) {
-////	            DefaultMutableTreeNode node = (DefaultMutableTreeNode) ((JTree) treeNode).getLastSelectedPathComponent();
-//
-//	        /* if nothing is selected */ 
-//	            if (treeNode == null) return;
-//
-//	        /* retrieve the node that was selected */ 
-//	           int nodeInfo = treeNode.getChildCount();
-//	           
-//	           for (int i = 0; i < nodeInfo; i++){
-//	        	   treeNodes[i][1]=treeNode.getChildAt(i);
-//	        	   System.out.println(node.getChildAt(i).toString());
-//	           }
-//	        }
-//	    });
-//		return [][];
-//	}
-	
-//	public void FillModel(DefaultListModel model, String[] items){
-//		for(int i = 0; i<items.length; i++){
-//			model.add(i,  items[i]);
-//		}
-//	}
-
-
 }
