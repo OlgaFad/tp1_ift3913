@@ -6,7 +6,7 @@ public class Parser {
 
     private ArrayList fileList = new ArrayList();
     Tree<String> model;
-    
+
     //CLASS HANDLER
     private void addClass(){
 
@@ -67,16 +67,79 @@ public class Parser {
         fileList.remove(0);
         String subclasses[] = fileList.get(0).toString().split(" ");
 
+        for(int i = 1; i<subclasses.length; i++){
+            if(i<(subclasses.length-1)){
+                generalization.add(subclasses[i].substring(0,(subclasses[i].length()-1)));
+            } else{
+                generalization.add(subclasses[i]);
+            }
+        }
+        fileList.remove(0);
+        model.findClass(generalizationParts[1]).addChildren(generalization);
     }
 
     //RELATION HANDLER
     private void addRelation() {
+        String relationParts[] = fileList.get(0).toString().split(" ");
+        String details = fileList.get(0).toString()+"\n";
+        String relationStr = "(R) "+relationParts[1];
+        ArrayList<String> classes = new ArrayList();
+        fileList.remove(0);
 
+        while(!(fileList.get(0).toString().startsWith(";"))){
+            details.concat(fileList.get(0).toString()+"\n");
+            if(fileList.get(0).toString().startsWith("CLASS")){
+                String roleParts[] = fileList.get(0).toString().split(" ");
+                classes.add(roleParts[1]);
+            }
+
+            fileList.remove(0);
+        }
+        details.concat(";");
+
+        for(int i = 0; i<classes.size(); i++){
+            ArrayList relations = new ArrayList();
+            relations.add(relationStr);
+            relations.add(details);
+            model.findClass(classes.get(i)).addChildren(relations);
+        }
+        fileList.remove(0);
     }
 
     //AGGREGATION
     private void addAggregation() {
+        String details = fileList.get(0).toString()+"\n";
+        String aggregationStr = "(A) ";
+        fileList.remove(0);
+        String[] aggrParts = {};
 
+        while((!(fileList.get(0).toString().startsWith("PARTS")))){
+            if(fileList.get(0).toString().startsWith(";")) break;
+            if(fileList.get(0).toString().startsWith("CLASS")) {
+                aggrParts = fileList.get(0).toString().split(" ");
+            }
+            details.concat(fileList.get(0).toString()+"\n");
+            fileList.remove(0);
+        }
+        details.concat(fileList.get(0).toString()+"\n");
+        fileList.remove(0);
+
+        ArrayList AggrToAdd = new ArrayList();
+        while(!(fileList.get(0).toString().startsWith(";"))){
+            details.concat(fileList.get(0).toString()+"\n");
+            String aggrClasses[] = fileList.get(0).toString().split(" ");
+            AggrToAdd.add(aggrClasses[1]);
+            fileList.remove(0);
+        }
+        details.concat(";");
+
+        for(int i = 0; i<AggrToAdd.size(); i++){
+            ArrayList toAdd = new ArrayList();
+            toAdd.add(AggrToAdd.get(i).toString());
+            toAdd.add(details);
+            model.findClass(aggrParts[1]).addChildren(toAdd);
+        }
+        fileList.remove(0);
     }
 
 
@@ -110,22 +173,26 @@ public class Parser {
             }
 
             //if next block is GENERALIZATION
-            if(fileList.get(0).toString().startsWith("GENERALIZATION")){
+            else if(fileList.get(0).toString().startsWith("GENERALIZATION")){
                 addGeneralization();
             }
 
             //if next block is RELATION
-            if(fileList.get(0).toString().startsWith("RELATION")){
+            else if(fileList.get(0).toString().startsWith("RELATION")){
                 addRelation();
             }
 
             //if next block is AGGREGATION
-            if(fileList.get(0).toString().startsWith("AGGREGATION")){
+            else if(fileList.get(0).toString().startsWith("AGGREGATION")){
                 addAggregation();
             }
 
             //if next block is semi colon
-            if(fileList.get(0).toString().startsWith(";")){
+            else if(fileList.get(0).toString().startsWith(";")){
+                fileList.remove(0);
+            }
+
+            else{
                 fileList.remove(0);
             }
         }
