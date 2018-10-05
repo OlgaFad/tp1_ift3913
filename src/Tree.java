@@ -1,7 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Tree<String> {
+public class Tree<S> {
+	
     String value = null;
     Tree<String> parent = null;
     List<Tree> children = new ArrayList<>();
@@ -16,7 +17,6 @@ public class Tree<String> {
     }
 
     public void setParent(Tree parent){
-        parent.addChild(this);
         this.parent = parent;
     }
 
@@ -48,5 +48,17 @@ public class Tree<String> {
 
     public void setValue(String value){
         this.value = value;
+    }
+
+    public Tree<String> findClass(String className){
+        int nbChildren = this.getChildren().size();
+        int j = -1;
+        for(int i = 0; i<nbChildren; i++){
+            if(((Tree)this.getChildren().get(i)).getValue() == className){
+                j = i;
+                break;
+            }
+        }
+        return (Tree)this.getChildren().get(j);
     }
 }

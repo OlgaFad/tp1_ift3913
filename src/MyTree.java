@@ -5,7 +5,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
-public class MyTree extends JTree{
+public class MyTree{
 
 	private JTree tree;
 	private DefaultMutableTreeNode root;

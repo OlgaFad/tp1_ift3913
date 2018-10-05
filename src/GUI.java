@@ -38,10 +38,27 @@ public class GUI {
 	private JTextField textField;
 	private String selectedElement;
 	private JTextArea output;
-	private JList attributs;
-	String newline = "\n";
-	int numberClasses = 0;
+	
+	//Création de tous les JList
+	private JList attributs = new JList();
+	private JList méthodes;
+	private JList sousClasses;
+	private JList relAgreg;
+	
+	//Création de tous les DefaultListModel
 	DefaultListModel attributsModel = new DefaultListModel();
+	DefaultListModel methodesModel = new DefaultListModel();
+	DefaultListModel sousClassesModel = new DefaultListModel();
+	DefaultListModel relAgregModel = new DefaultListModel();
+	
+	//Creation des tableaux pour chaque valeursl
+//	String[] classes;
+//	String[][] attr;
+//	String[][] met;
+//	String[][] sc;
+//	String[][] relAgr;
+	
+	int numberClasses = 0;
 	MyTree tree;
 	DefaultMutableTreeNode root;
 	DefaultMutableTreeNode[] dmtnRootChildren;
@@ -107,7 +124,7 @@ public class GUI {
 //			            chooser.getSelectedFile().getName());
 			    	
 			    	if (chooser.getSelectedFile().canRead() == true) {
-//			    		Parser(chooser.getSelectedFile());
+// 			    		Tree<String> arbre = parseFile(chooser.getSelectedFile());
 			    	}
 			    }
 				
@@ -117,6 +134,9 @@ public class GUI {
 		
 		btnNewButton.setBounds(17, 6, 117, 29);
 		frame.getContentPane().add(btnNewButton);
+		
+		
+		
 		
 		
 		
@@ -130,8 +150,16 @@ public class GUI {
 		String[] attributsEq = {"String nom_equipe"};
 		String[] attributsEn = {"Integer degre"};
 		
-		String[][] attribut = {attributsP, attributsEq, attributsEn};
+		String[] metP = {"bob", "ana"};
+		String[] metEq = {"cool"};
+		String[] metEn = {"nice"};
 		
+		
+		String[][] attr = {attributsP, attributsEq, attributsEn};
+		String[][] met = {metP, metEq, metEn};
+		String[][] sc = {};
+		String[][] relAgr = {};
+		//Creation de l'arbre
 		tree.createNodeChildren(root, classes);
 
 		//Creation des DefaultListModel pour chaque noeud
@@ -143,53 +171,35 @@ public class GUI {
 		classesL.setBounds(17, 59, 117, 224);
 		frame.getContentPane().add(classesL);
 		
-		dmtnRootChildren = tree.getChildrenTreeNodes(root);
-		numberClasses = dmtnRootChildren.length;
+		fillClasses(attr, met, sc, relAgr); //Rempli les attributs de chaque classe
 		
-		//Rempli les enfants de chaque classe
-		for(int i = 0; i <numberClasses; i++){
-			
-			tree.createNodeChildren(dmtnRootChildren[i], attribut[i]);
-//			attributsModel = tree.createDefaultListModel(dmtnRootChildren[i]);
-		}
 		
-
-		attributs = new JList();
-		attributs.setModel(attributsModel);
 		attributs.setBounds(149, 59, 132, 65);
 		frame.getContentPane().add(attributs);
-		System.out.println(attributs.getModel());
 		
 		ListSelectionModel classesLSelectionModel;
 		classesLSelectionModel = classesL.getSelectionModel();
 		classesLSelectionModel.addListSelectionListener( new ClassListSelectionHandler());
 		
-//		listEventListener();
-
-//		output = new JTextArea();
-//		output.setBounds(146, 202, 97, 16);
-//		frame.getContentPane().add(output);
-		
-		
 		DefaultListModel methodesModel = new DefaultListModel();
-		JList méthodes = new JList();
+		méthodes = new JList();
 		méthodes.setBounds(293, 59, 121, 65);
 		frame.getContentPane().add(méthodes);
+		
+		DefaultListModel sousClassesModel = new DefaultListModel();
+		sousClasses = new JList();
+		sousClasses.setBounds(149, 145, 132, 50);
+		frame.getContentPane().add(sousClasses);
+		
+		DefaultListModel assocAgregModel = new DefaultListModel();
+		relAgreg = new JList();
+		relAgreg.setBounds(293, 145, 124, 50);
+		frame.getContentPane().add(relAgreg);
 		
 		DefaultListModel detailsModel = new DefaultListModel();
 		JTextArea details = new JTextArea();
 		details.setBounds(224, 207, 268, 65);
 		frame.getContentPane().add(details);
-		
-		DefaultListModel sousClassesModel = new DefaultListModel();
-		JList sousClasses = new JList();
-		sousClasses.setBounds(149, 145, 132, 50);
-		frame.getContentPane().add(sousClasses);
-		
-		DefaultListModel assocAgregModel = new DefaultListModel();
-		JList assocAgreg = new JList();
-		assocAgreg.setBounds(293, 145, 124, 50);
-		frame.getContentPane().add(assocAgreg);
 		
 		JLabel lblClasses = new JLabel("Classes");
 		lblClasses.setBounds(17, 42, 61, 16);
@@ -218,13 +228,34 @@ public class GUI {
 	}
 	
 	
-	
-	private void classListValueChanged(javax.swing.event.ListSelectionListener evt, JList list){
-		String selected = list.getSelectedValue().toString();
-		selectedElement = selected;
+	public void fillClasses(String[][]attr, String[][] met,String[][] sc,String[][] relAgr){
+		dmtnRootChildren = tree.getChildrenTreeNodes(root);
+		numberClasses = dmtnRootChildren.length;
 		
+		for(int i = 0; i <numberClasses-1; i++){
+			switch(i){
+				case 1: tree.createNodeChild(dmtnRootChildren[i], "attribut");
+				case 2: tree.createNodeChild(dmtnRootChildren[i], "methodes");
+				case 3: tree.createNodeChild(dmtnRootChildren[i], "sous-classes");
+				case 4: tree.createNodeChild(dmtnRootChildren[i], "relations/agregations"); 
+			}
+			DefaultMutableTreeNode[] node = tree.getChildrenTreeNodes(dmtnRootChildren[i]);
+			try{
+				switch(i){
+					case 1: tree.createNodeChildren(node[i], attr[i]);
+					case 2: tree.createNodeChildren(node[i], met[i]);
+					case 3: tree.createNodeChildren(node[i], sc[i]);
+					case 4: tree.createNodeChildren(node[i], relAgr[i]); 
+				}
+			}catch(IndexOutOfBoundsException e){
+				continue;
+			}
+		}
 	}
 	
+	
+	
+	//ListSelectionListener pour les classes
 	class ClassListSelectionHandler implements ListSelectionListener {
 	    public void valueChanged(ListSelectionEvent e) {
 	        ListSelectionModel lsm = (ListSelectionModel)e.getSource();
@@ -240,9 +271,32 @@ public class GUI {
 	        }
 	        
 	        attributs.setModel(attributsModel);
-	        System.out.println(attributs.getModel());
-			frame.getContentPane().add(attributs);
+//	        System.out.println(attributs.getModel());
+//			frame.getContentPane().add(attributs);
 	        
 	    }
 	}
+	
+	//ListSelectionListener pour les relations et aggregations
+	class RelAggListSelectionHandler implements ListSelectionListener {
+	    public void valueChanged(ListSelectionEvent e) {
+	        ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+	        
+	        for(int i=0; i<relAgregModel.size(); i++){
+	        	relAgregModel.remove(i);
+	        }
+	        
+	        for(int i = 0; i< numberClasses; i++){
+	        	if (lsm.isSelectedIndex(i)){
+	        		relAgregModel = tree.createDefaultListModel(dmtnRootChildren[i]);
+	        	}
+	        }
+	        
+	        relAgreg.setModel(relAgregModel);
+	        System.out.println(relAgreg.getModel());
+			frame.getContentPane().add(relAgreg);
+	        
+	    }
+	}
+	
 }
